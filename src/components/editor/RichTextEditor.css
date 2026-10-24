@@ -1,0 +1,51 @@
+.cv-rich-editor-box {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background-color: #ffffff;
+  overflow: hidden;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cv-rich-editor-box:focus-within {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.cv-rich-editor-content {
+  padding: 10px 14px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: #1e293b;
+  outline: none;
+  cursor: text;
+  overflow-y: auto;
+}
+
+.cv-rich-editor-content .ProseMirror {
+  outline: none;
+  min-height: 80px;
+}
+
+.cv-rich-editor-content .ProseMirror p {
+  margin: 0 0 6px 0;
+}
+
+.cv-rich-editor-content .ProseMirror p:last-child {
+  margin-bottom: 0;
+}
+
+.cv-rich-editor-content .ProseMirror ul,
+.cv-rich-editor-content .ProseMirror ol {
+  padding-left: 20px;
+  margin: 4px 0 8px 0;
+}
+
+.cv-rich-editor-content .ProseMirror li {
+  margin-bottom: 3px;
+}
+
+.cv-rich-editor-content .ProseMirror:focus {
+  outline: none;
+}

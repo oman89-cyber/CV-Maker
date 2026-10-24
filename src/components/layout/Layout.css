@@ -6,8 +6,22 @@
   background-color: var(--bg-primary);
 }
 
+.cv-app-shell--editor {
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+}
+
 .cv-main-content {
   flex: 1 0 auto;
   display: flex;
   flex-direction: column;
+}
+
+.cv-main-content--editor {
+  flex: 1 1 0%;
+  min-height: 0;
+  height: calc(100vh - 72px);
+  max-height: calc(100vh - 72px);
+  overflow: hidden;
 }
