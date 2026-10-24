@@ -199,3 +199,422 @@
   font-size: 0.9375rem;
   color: var(--text-secondary);
 }
+
+/* --------------------------------------------------------------------------
+   Document Import Error & Status Banners
+   -------------------------------------------------------------------------- */
+.cv-import-error-card {
+  background-color: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  color: #991b1b;
+}
+
+.cv-import-error-icon {
+  color: #dc2626;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.cv-import-error-title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.cv-import-error-desc {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: #7f1d1d;
+  margin: 0;
+}
+
+/* Loading Spinner */
+.cv-import-loading-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  gap: 16px;
+  text-align: center;
+}
+
+.cv-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(37, 99, 235, 0.15);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: cv-spin 0.8s linear infinite;
+}
+
+@keyframes cv-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.cv-import-loading-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.cv-import-loading-hint {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+/* Sample File Triggers */
+.cv-import-sample-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-light);
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.cv-import-sample-btn {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.cv-import-sample-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background-color: var(--accent-light);
+}
+
+/* --------------------------------------------------------------------------
+   Stage 2: Review Screen Layout
+   -------------------------------------------------------------------------- */
+.cv-review-container {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.cv-review-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 24px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.cv-review-doc-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.cv-review-doc-name {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.cv-review-doc-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.cv-review-warnings-box {
+  background-color: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #92400e;
+  font-size: 0.8125rem;
+}
+
+/* Template Choice Strip in Review Screen */
+.cv-review-template-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cv-review-template-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.cv-review-template-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.cv-review-tpl-card {
+  padding: 10px 14px;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-primary);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  transition: all var(--transition-fast);
+}
+
+.cv-review-tpl-card:hover {
+  border-color: var(--accent);
+}
+
+.cv-review-tpl-card--active {
+  border-color: var(--accent) !important;
+  background-color: var(--accent-light) !important;
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.cv-review-tpl-card__name {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.cv-review-tpl-card__meta {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+/* Section Cards in Review Screen */
+.cv-review-card {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.cv-review-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 12px;
+}
+
+.cv-review-card__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.cv-review-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.cv-review-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cv-review-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.cv-review-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  box-sizing: border-box;
+}
+
+.cv-review-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-light);
+}
+
+.cv-review-textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-family: inherit;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  box-sizing: border-box;
+  resize: vertical;
+}
+
+.cv-review-textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-light);
+}
+
+/* Repeatable items in review screen */
+.cv-review-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cv-review-item-box {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+}
+
+.cv-review-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cv-review-delete-btn {
+  background: transparent;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  color: #dc2626;
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  font-size: 0.71875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.cv-review-delete-btn:hover {
+  background-color: #fee2e2;
+  border-color: #dc2626;
+}
+
+.cv-review-add-btn {
+  align-self: flex-start;
+  padding: 6px 14px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px dashed var(--border-medium);
+  background: var(--bg-primary);
+  color: var(--accent);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.cv-review-add-btn:hover {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+/* Skills Editor in Review */
+.cv-review-skills-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cv-review-skill-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+  font-size: 0.78125rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.cv-review-skill-remove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.875rem;
+  line-height: 1;
+}
+
+.cv-review-skill-remove:hover {
+  color: #dc2626;
+}
+
+.cv-review-add-skill-row {
+  display: flex;
+  gap: 8px;
+  max-width: 360px;
+}
+
+/* Review Sticky Footer */
+.cv-review-actions-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 24px;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  position: sticky;
+  bottom: 24px;
+  z-index: 50;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .cv-review-grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .cv-review-actions-bar {
+    position: static;
+  }
+}
+

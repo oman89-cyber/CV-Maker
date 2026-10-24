@@ -46,8 +46,16 @@ export const EditorPage: React.FC = () => {
       const parsed = saved ? JSON.parse(saved) : null;
       const baseData = normalizeCVData(parsed || DEFAULT_CV_DATA);
 
-      // If user came from CreatePage with pre-filled state
-      const navState = location.state as { fullName?: string; targetRole?: string } | null;
+      // If user came from ImportPage or CreatePage with state
+      const navState = location.state as {
+        fullName?: string;
+        targetRole?: string;
+        importedData?: CVData;
+      } | null;
+
+      if (navState && navState.importedData) {
+        return normalizeCVData(navState.importedData);
+      }
       if (navState && (navState.fullName || navState.targetRole)) {
         return {
           ...baseData,
