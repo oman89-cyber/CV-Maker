@@ -1,22 +1,78 @@
-import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   FileTextIcon,
   DownloadIcon,
   SparklesIcon,
   CheckCircleIcon,
   LayersIcon,
-  Edit3Icon,
 } from '../components/common/Icons';
 import { Button } from '../components/common/Button';
 import { Badge } from '../components/common/Badge';
+import { CVRenderer } from '../components/cv/CVRenderer';
+import { type CVData, DEFAULT_CV_DATA } from '../types/cv';
+import { TEMPLATES_REGISTRY, getTemplateById } from '../data/templates';
 import './EditorPage.css';
+
+const STORAGE_KEY = 'cvforge_active_document';
 
 export const EditorPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [docTitle, setDocTitle] = useState('Senior Software Engineer CV');
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const currentTemplate = getTemplateById(id);
+
+  // Initialize CV Data with preservation from localStorage or router state
+  const [cvData, setCvData] = useState<CVData>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      const baseData = saved ? JSON.parse(saved) : DEFAULT_CV_DATA;
+
+      // If user came from CreatePage with pre-filled state
+      const navState = location.state as { fullName?: string; targetRole?: string } | null;
+      if (navState && (navState.fullName || navState.targetRole)) {
+        return {
+          ...baseData,
+          personal: {
+            ...baseData.personal,
+            fullName: navState.fullName || baseData.personal.fullName,
+            targetRole: navState.targetRole || baseData.personal.targetRole,
+          },
+        };
+      }
+      return baseData;
+    } catch {
+      return DEFAULT_CV_DATA;
+    }
+  });
+
   const [activeTab, setActiveTab] = useState<'content' | 'appearance' | 'sections'>('content');
   const [selectedSection, setSelectedSection] = useState('personal');
+
+  // Persist CV data to localStorage on changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cvData));
+    } catch {
+      // Ignore storage errors in restricted contexts
+    }
+  }, [cvData]);
+
+  const handleTemplateChange = (newTemplateId: string) => {
+    navigate(`/editor/${newTemplateId}`);
+  };
+
+  const updatePersonalInfo = (field: keyof typeof cvData.personal, value: string) => {
+    setCvData((prev) => ({
+      ...prev,
+      personal: {
+        ...prev.personal,
+        [field]: value,
+      },
+      updatedAt: new Date().toISOString(),
+    }));
+  };
 
   const editorSections = [
     { id: 'personal', label: 'Personal Information', completed: true },
@@ -38,14 +94,16 @@ export const EditorPage: React.FC = () => {
           <div className="cv-editor-doc-title">
             <input
               type="text"
-              value={docTitle}
-              onChange={(e) => setDocTitle(e.target.value)}
+              value={cvData.title}
+              onChange={(e) =>
+                setCvData((prev) => ({ ...prev, title: e.target.value }))
+              }
               className="cv-doc-title-input"
               aria-label="Document Title"
             />
           </div>
           <Badge variant="accent" size="sm">
-            Template: {id || 'default-modern'}
+            Template: {currentTemplate.name}
           </Badge>
           <div className="cv-editor-saved-status">
             <CheckCircleIcon size={14} />
@@ -54,13 +112,31 @@ export const EditorPage: React.FC = () => {
         </div>
 
         <div className="cv-editor-toolbar__right">
+          {/* Quick template selector to verify data preservation */}
+          <div className="cv-template-quick-select">
+            <label htmlFor="quick-tpl" className="sr-only">Switch Template</label>
+            <select
+              id="quick-tpl"
+              value={currentTemplate.id}
+              onChange={(e) => handleTemplateChange(e.target.value)}
+              className="cv-quick-tpl-select"
+              aria-label="Switch CV Template"
+            >
+              {TEMPLATES_REGISTRY.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name} ({t.categoryLabel})
+                </option>
+              ))}
+            </select>
+          </div>
+
           <Button
             to="/templates"
             variant="ghost"
             size="sm"
             leftIcon={<LayersIcon size={16} />}
           >
-            Change Template
+            All Templates
           </Button>
           <Button
             variant="primary"
@@ -68,7 +144,7 @@ export const EditorPage: React.FC = () => {
             leftIcon={<DownloadIcon size={16} />}
             onClick={() =>
               alert(
-                'PDF Export Engine will be attached in Stage 2. The foundation and layout are ready.'
+                'PDF Export Engine will be attached in Stage 2. Your document and template layout are active.'
               )
             }
           >
@@ -125,50 +201,86 @@ export const EditorPage: React.FC = () => {
             ))}
           </div>
 
-          {/* Form Foundation Box */}
+          {/* Form Editing / Foundation Box */}
           <div className="cv-section-form-container">
             <div className="cv-form-header">
               <h3 className="cv-form-title">
                 {editorSections.find((s) => s.id === selectedSection)?.label || 'Section Details'}
               </h3>
               <Badge variant="neutral" size="sm">
-                Stage 1 Foundation
+                Interactive Preview
               </Badge>
             </div>
 
             <div className="cv-form-placeholder-body">
-              <p className="cv-form-notice">
-                Form inputs and rich-text editing controls will plug into this modular container in
-                Stage 2.
-              </p>
-
-              <div className="cv-form-sample-fields">
-                <div className="cv-form-sample-row">
-                  <div className="cv-form-sample-input" />
-                  <div className="cv-form-sample-input" />
+              {selectedSection === 'personal' ? (
+                <div className="cv-edit-fields">
+                  <div className="cv-form-group">
+                    <label className="cv-label" htmlFor="edit-name">Full Name</label>
+                    <input
+                      id="edit-name"
+                      type="text"
+                      className="cv-input"
+                      value={cvData.personal.fullName}
+                      onChange={(e) => updatePersonalInfo('fullName', e.target.value)}
+                    />
+                  </div>
+                  <div className="cv-form-group">
+                    <label className="cv-label" htmlFor="edit-role">Target Role / Title</label>
+                    <input
+                      id="edit-role"
+                      type="text"
+                      className="cv-input"
+                      value={cvData.personal.targetRole}
+                      onChange={(e) => updatePersonalInfo('targetRole', e.target.value)}
+                    />
+                  </div>
+                  <div className="cv-form-group">
+                    <label className="cv-label" htmlFor="edit-email">Email Address</label>
+                    <input
+                      id="edit-email"
+                      type="email"
+                      className="cv-input"
+                      value={cvData.personal.email}
+                      onChange={(e) => updatePersonalInfo('email', e.target.value)}
+                    />
+                  </div>
+                  <div className="cv-form-group">
+                    <label className="cv-label" htmlFor="edit-phone">Phone Number</label>
+                    <input
+                      id="edit-phone"
+                      type="text"
+                      className="cv-input"
+                      value={cvData.personal.phone}
+                      onChange={(e) => updatePersonalInfo('phone', e.target.value)}
+                    />
+                  </div>
                 </div>
-                <div className="cv-form-sample-input" style={{ width: '85%' }} />
-                <div className="cv-form-sample-textarea" />
-              </div>
-
-              <div className="cv-form-cta-strip">
-                <Button
-                  to="/templates"
-                  variant="secondary"
-                  size="sm"
-                  leftIcon={<LayersIcon size={14} />}
-                >
-                  Explore other layouts
-                </Button>
-                <Button
-                  to="/import"
-                  variant="ghost"
-                  size="sm"
-                  leftIcon={<Edit3Icon size={14} />}
-                >
-                  Import existing data
-                </Button>
-              </div>
+              ) : selectedSection === 'summary' ? (
+                <div className="cv-edit-fields">
+                  <div className="cv-form-group">
+                    <label className="cv-label" htmlFor="edit-summary">Professional Summary</label>
+                    <textarea
+                      id="edit-summary"
+                      className="cv-textarea"
+                      rows={5}
+                      value={cvData.summary}
+                      onChange={(e) =>
+                        setCvData((prev) => ({ ...prev, summary: e.target.value }))
+                      }
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <p className="cv-form-notice">
+                    Full structured controls for {selectedSection} will integrate with Tiptap rich-text editing in the next stage.
+                  </p>
+                  <p className="cv-form-notice" style={{ marginTop: '8px' }}>
+                    Current data is safely preserved across all template switches.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </aside>
@@ -178,112 +290,18 @@ export const EditorPage: React.FC = () => {
           <div className="cv-canvas-bar">
             <div className="cv-canvas-bar__info">
               <SparklesIcon size={16} />
-              <span>Standard A4 Preview • Scale 100%</span>
+              <span>
+                Standard A4 Preview • Active Template: <strong>{currentTemplate.name}</strong>
+              </span>
             </div>
             <div className="cv-canvas-bar__actions">
-              <span className="cv-canvas-badge">Ready for Stage 2 Rich-Text Engine</span>
+              <span className="cv-canvas-badge">Dynamic Template Renderer</span>
             </div>
           </div>
 
           <div className="cv-preview-scroll-area">
-            {/* A4 Sheet Container */}
-            <div className="cv-a4-sheet">
-              {/* Document Header */}
-              <div className="cv-doc-header">
-                <div>
-                  <h1 className="cv-doc-name">Alexander Wright</h1>
-                  <div className="cv-doc-role">Principal Platform Architect & Engineering Lead</div>
-                </div>
-                <div className="cv-doc-contact">
-                  <div>alexander.wright@domain.com</div>
-                  <div>+1 (555) 019-2834</div>
-                  <div>San Francisco, CA • linkedin.com/in/awright</div>
-                </div>
-              </div>
-
-              <div className="cv-doc-divider" />
-
-              {/* Summary */}
-              <div className="cv-doc-section">
-                <h2 className="cv-doc-section-heading">Professional Summary</h2>
-                <p className="cv-doc-body-text">
-                  Engineering leader with 10+ years specializing in distributed systems, real-time
-                  data streaming, and leading high-velocity frontend architecture teams. Proven track
-                  record scaling consumer services from seed stage to 50M+ monthly active users.
-                </p>
-              </div>
-
-              {/* Experience */}
-              <div className="cv-doc-section">
-                <h2 className="cv-doc-section-heading">Work Experience</h2>
-
-                <div className="cv-doc-item">
-                  <div className="cv-doc-item__header">
-                    <div>
-                      <span className="cv-doc-item__title">Principal Software Engineer</span> —{' '}
-                      <span className="cv-doc-item__company">Apex Systems Cloud</span>
-                    </div>
-                    <span className="cv-doc-item__date">2022 — Present</span>
-                  </div>
-                  <ul className="cv-doc-bullet-list">
-                    <li>
-                      Designed micro-frontend architecture decreasing page bundle sizes by 48% across 6
-                      core user portals.
-                    </li>
-                    <li>
-                      Architected high-throughput event processing pipeline handling 120,000 req/sec at
-                      sub-10ms p99 latency.
-                    </li>
-                    <li>
-                      Mentored 14 senior engineers and established company-wide TypeScript quality
-                      guidelines.
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="cv-doc-item">
-                  <div className="cv-doc-item__header">
-                    <div>
-                      <span className="cv-doc-item__title">Senior Full Stack Engineer</span> —{' '}
-                      <span className="cv-doc-item__company">Hyperion Labs</span>
-                    </div>
-                    <span className="cv-doc-item__date">2018 — 2022</span>
-                  </div>
-                  <ul className="cv-doc-bullet-list">
-                    <li>
-                      Led delivery of collaborative real-time editor using WebSocket protocols and CRDTs.
-                    </li>
-                    <li>Reduced continuous integration build times from 18 minutes to 4.2 minutes.</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Skills */}
-              <div className="cv-doc-section">
-                <h2 className="cv-doc-section-heading">Technical Expertise</h2>
-                <div className="cv-doc-skills-row">
-                  <span className="cv-doc-skill-pill">TypeScript / JavaScript</span>
-                  <span className="cv-doc-skill-pill">React & Next.js</span>
-                  <span className="cv-doc-skill-pill">Node.js</span>
-                  <span className="cv-doc-skill-pill">PostgreSQL / Redis</span>
-                  <span className="cv-doc-skill-pill">Kubernetes & Docker</span>
-                  <span className="cv-doc-skill-pill">GraphQL / REST</span>
-                  <span className="cv-doc-skill-pill">System Architecture</span>
-                </div>
-              </div>
-
-              {/* Education */}
-              <div className="cv-doc-section">
-                <h2 className="cv-doc-section-heading">Education</h2>
-                <div className="cv-doc-item__header">
-                  <div>
-                    <span className="cv-doc-item__title">B.S. in Computer Science & Mathematics</span>{' '}
-                    — <span className="cv-doc-item__company">University of California, Berkeley</span>
-                  </div>
-                  <span className="cv-doc-item__date">Graduated with Honors</span>
-                </div>
-              </div>
-            </div>
+            {/* Template-aware dynamic CV Renderer */}
+            <CVRenderer cvData={cvData} template={currentTemplate} />
           </div>
         </section>
       </div>

@@ -41,7 +41,7 @@ export const Footer: React.FC = () => {
                   <Link to="/import">Import Existing Document</Link>
                 </li>
                 <li>
-                  <Link to="/editor/sample-preview">Live Editor Preview</Link>
+                  <Link to="/editor/silicon-modern">Live Editor Preview</Link>
                 </li>
               </ul>
             </div>

@@ -27,8 +27,13 @@ export const CreatePage: React.FC = () => {
     } else if (selectedMethod === 'import') {
       navigate('/import');
     } else {
-      const cvId = `cv-${Date.now().toString(36)}`;
-      navigate(`/editor/${cvId}`);
+      const cvId = 'silicon-modern';
+      navigate(`/editor/${cvId}`, {
+        state: {
+          fullName: fullName.trim() || undefined,
+          targetRole: targetRole.trim() || undefined,
+        },
+      });
     }
   };
 

@@ -3,87 +3,14 @@ import { ArrowRightIcon, SparklesIcon, EyeIcon } from '../components/common/Icon
 import { Button } from '../components/common/Button';
 import { Badge } from '../components/common/Badge';
 import { Card } from '../components/common/Card';
+import { TEMPLATES_REGISTRY } from '../data/templates';
 import './TemplatesPage.css';
-
-interface TemplateItem {
-  id: string;
-  name: string;
-  category: 'all' | 'modern' | 'executive' | 'minimal' | 'academic' | 'creative';
-  categoryLabel: string;
-  description: string;
-  pages: string;
-  tag?: string;
-  primaryColor: string;
-}
-
-const TEMPLATES_LIST: TemplateItem[] = [
-  {
-    id: 'silicon-modern',
-    name: 'Silicon Modern',
-    category: 'modern',
-    categoryLabel: 'Tech & Engineering',
-    description: 'Crisp two-column hierarchy tailored for software engineers, product managers, and technical leads.',
-    pages: '1 Page',
-    tag: 'Popular',
-    primaryColor: '#2563eb',
-  },
-  {
-    id: 'apex-executive',
-    name: 'Apex Executive',
-    category: 'executive',
-    categoryLabel: 'Leadership & Strategy',
-    description: 'Refined header with high-impact metrics focus for directors, VPs, and C-suite leaders.',
-    pages: '1-2 Pages',
-    tag: 'Executive',
-    primaryColor: '#1e3a8a',
-  },
-  {
-    id: 'nordic-minimal',
-    name: 'Nordic Clean',
-    category: 'minimal',
-    categoryLabel: 'Minimalist',
-    description: 'Generous white space, subtle typographical contrast, and razor-sharp ATS compliance.',
-    pages: '1 Page',
-    tag: 'ATS Optimized',
-    primaryColor: '#0f172a',
-  },
-  {
-    id: 'oxford-academic',
-    name: 'Oxford Scholar',
-    category: 'academic',
-    categoryLabel: 'Academia & Research',
-    description: 'Designed for publications, research grants, teaching appointments, and detailed citations.',
-    pages: 'Multi-Page',
-    tag: 'Comprehensive',
-    primaryColor: '#0f766e',
-  },
-  {
-    id: 'vanguard-tech',
-    name: 'Vanguard Systems',
-    category: 'modern',
-    categoryLabel: 'Data & Cloud',
-    description: 'Dedicated sections for technical stacks, cloud certifications, and high-scale architectures.',
-    pages: '1 Page',
-    tag: 'Technical',
-    primaryColor: '#4f46e5',
-  },
-  {
-    id: 'prism-creative',
-    name: 'Prism Creative',
-    category: 'creative',
-    categoryLabel: 'Design & Marketing',
-    description: 'Balanced accent touches showcasing portfolio highlights, case studies, and brand narrative.',
-    pages: '1-2 Pages',
-    tag: 'Portfolio',
-    primaryColor: '#7c3aed',
-  },
-];
 
 export const TemplatesPage: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  const filteredTemplates = TEMPLATES_LIST.filter((tpl) => {
+  const filteredTemplates = TEMPLATES_REGISTRY.filter((tpl) => {
     const matchesCategory = activeCategory === 'all' || tpl.category === activeCategory;
     const matchesSearch =
       tpl.name.toLowerCase().includes(searchQuery.toLowerCase()) ||

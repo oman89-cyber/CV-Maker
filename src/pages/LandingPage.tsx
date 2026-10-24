@@ -19,7 +19,7 @@ import './LandingPage.css';
 export const LandingPage: React.FC = () => {
   const featuredTemplates = [
     {
-      id: 'template-executive',
+      id: 'apex-executive',
       name: 'The Executive',
       category: 'Leadership & Management',
       tag: 'Most Popular',
@@ -27,7 +27,7 @@ export const LandingPage: React.FC = () => {
       accentLabel: 'Navy Classic',
     },
     {
-      id: 'template-tech-minimal',
+      id: 'silicon-modern',
       name: 'Tech Modern',
       category: 'Software & Engineering',
       tag: 'ATS Optimized',
@@ -35,15 +35,15 @@ export const LandingPage: React.FC = () => {
       accentLabel: 'Cobalt Blue',
     },
     {
-      id: 'template-nordic',
+      id: 'nordic-minimal',
       name: 'Nordic Clean',
       category: 'Design & Product',
       tag: 'Minimalist',
-      color: '#334155',
+      color: '#0f172a',
       accentLabel: 'Slate Neutral',
     },
     {
-      id: 'template-academic',
+      id: 'oxford-academic',
       name: 'Academic Classic',
       category: 'Research & Academia',
       tag: 'Multi-Page',
