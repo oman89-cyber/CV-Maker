@@ -1,0 +1,279 @@
+/* ==========================================================================
+   CVForge Dedicated Print & PDF Export Stylesheet
+   Ensures 100% visual fidelity, multi-page layout fragmentation,
+   color reproduction, and seamless browser-native Print-to-PDF.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Default Page Geometry Tokens
+   -------------------------------------------------------------------------- */
+@page {
+  size: A4 portrait;
+  margin: 8mm 10mm 10mm 10mm;
+}
+
+/* --------------------------------------------------------------------------
+   Interactive In-App Print Preview Mode (Screen-only)
+   -------------------------------------------------------------------------- */
+.cv-editor-page--fullscreen-preview .cv-editor-workspace {
+  grid-template-columns: 1fr !important;
+}
+
+.cv-editor-page--fullscreen-preview .cv-editor-sidebar {
+  display: none !important;
+}
+
+.cv-preview-fullscreen-bar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background-color: #0f172a;
+  color: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.cv-preview-fullscreen-bar__left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.cv-preview-exit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 6px 14px;
+  border-radius: var(--radius-md);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.cv-preview-exit-btn:hover {
+  background-color: rgba(255, 255, 255, 0.22);
+}
+
+.cv-preview-fullscreen-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.cv-preview-fullscreen-bar__center {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cv-page-size-toggle {
+  display: inline-flex;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 3px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.cv-page-size-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.cv-page-size-btn--active {
+  background-color: var(--accent);
+  color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.cv-preview-fullscreen-bar__right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   Print Mode Isolation (@media print)
+   -------------------------------------------------------------------------- */
+@media print {
+  /* 1. Complete Suppression of Application Chrome */
+  .skip-to-content,
+  .cv-navbar,
+  .cv-footer,
+  .cv-editor-toolbar,
+  .cv-editor-sidebar,
+  .cv-canvas-bar,
+  .cv-mobile-view-toggle,
+  .cv-print-modal-backdrop,
+  .cv-print-modal,
+  .cv-preview-fullscreen-bar,
+  .cv-toast {
+    display: none !important;
+  }
+
+  /* 2. Unconstrain Root and Ancestor Viewport Containers */
+  html,
+  body {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+    color: #1e293b !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  #root,
+  .cv-app-shell,
+  .cv-app-shell--editor,
+  .cv-main-content,
+  .cv-main-content--editor,
+  .cv-editor-page,
+  .cv-editor-workspace,
+  .cv-editor-preview-canvas,
+  .cv-preview-scroll-area,
+  .cv-preview-zoom-container {
+    display: block !important;
+    position: static !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    transform: none !important; /* Resets zoom scaling */
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* 3. Document Styling for Paper */
+  .cv-renderer {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background-color: #ffffff !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* 4. Exact Color & Background Preservation */
+  *,
+  *::before,
+  *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* 5. Header Layout and Avoid Header Splits */
+  .cv-renderer__header {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  /* 6. Section Headings: Avoid Stranded Headings (Orphans) */
+  .cv-renderer__section-heading {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    break-after: avoid !important;
+    page-break-after: avoid !important;
+  }
+
+  /* 7. Individual Repeatable Items */
+  .cv-renderer__item {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Very long item descriptions can break across pages gracefully */
+  .cv-renderer__item.cv-renderer__item--long,
+  .cv-rich-content {
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+
+  /* 8. Bullet Lists & Item Highlights */
+  .cv-renderer__bullet {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* 9. Skills & Languages Groups */
+  .cv-renderer__skills,
+  .cv-renderer__languages-grid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* 10. Multi-Column & Split Layouts */
+  .cv-renderer__body,
+  .cv-renderer__body-split,
+  .cv-col-main,
+  .cv-col-side,
+  .cv-sidebar-col,
+  .cv-main-col {
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  /* 11. Profile Photo Frame */
+  .cv-profile-photo-frame {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    box-shadow: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .cv-profile-photo-img {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* 12. Hyperlinks in Print */
+  a {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+
+  /* Prevent browser URL insertion after anchor tags */
+  a[href]::after {
+    content: "" !important;
+  }
+}

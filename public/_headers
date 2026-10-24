@@ -1,0 +1,17 @@
+# Cloudflare Pages Security & Cache Configuration
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# Cache-Control: hashed production assets can be safely cached for 1 year
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Cache-Control: ensure HTML entry points are always fresh
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/_redirects
+  Cache-Control: no-store

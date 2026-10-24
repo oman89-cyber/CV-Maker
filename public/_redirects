@@ -1,0 +1,3 @@
+# Cloudflare Pages SPA rewrite rule
+# Direct visits and refreshes on client-side routes fallback to /index.html with status 200
+/*    /index.html   200

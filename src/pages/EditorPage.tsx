@@ -2,15 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   FileTextIcon,
-  DownloadIcon,
   SparklesIcon,
   CheckCircleIcon,
   LayersIcon,
   UploadIcon,
+  PrinterIcon,
+  EyeIcon,
 } from '../components/common/Icons';
 import { Button } from '../components/common/Button';
 import { Badge } from '../components/common/Badge';
 import { CVRenderer } from '../components/cv/CVRenderer';
+import { PrintExportModal } from '../components/cv/PrintExportModal';
 import { RichTextEditor } from '../components/editor/RichTextEditor';
 import {
   type CVData,
@@ -46,6 +48,68 @@ export const EditorPage: React.FC = () => {
       const parsed = saved ? JSON.parse(saved) : null;
       const baseData = normalizeCVData(parsed || DEFAULT_CV_DATA);
 
+      // Support query parameters for automated test scenarios (?sample=short, ?size=letter)
+      const searchParams = new URLSearchParams(location.search);
+      if (searchParams.get('sample') === 'short') {
+        return {
+          ...DEFAULT_CV_DATA,
+          title: 'Emily Thorne - Junior Developer CV',
+          personal: {
+            fullName: 'Emily Thorne',
+            targetRole: 'Junior Frontend Developer',
+            email: 'emily.thorne@example.com',
+            phone: '+1 (555) 234-5678',
+            location: 'Boston, MA',
+            linkedin: 'linkedin.com/in/emilythorne',
+          },
+          summary:
+            'Motivated Computer Science graduate with hands-on experience developing modern web applications in React and TypeScript.',
+          experience: [
+            {
+              id: 'exp-short-1',
+              title: 'Frontend Engineering Intern',
+              company: 'NovaTech Studios',
+              location: 'Boston, MA',
+              startDate: '2023',
+              endDate: '2024',
+              description:
+                'Collaborated with engineering team to deliver accessible React UI components.',
+              bullets: [
+                'Built responsive customer dashboard components matching Figma designs',
+                'Optimized CSS bundle size by 22% using modern CSS custom properties',
+              ],
+            },
+          ],
+          education: [
+            {
+              id: 'edu-short-1',
+              degree: 'B.S. in Computer Science',
+              school: 'Boston University',
+              endDate: '2023',
+              honors: 'Summa Cum Laude • Dean’s List',
+            },
+          ],
+          skills: ['React', 'TypeScript', 'HTML5 & CSS3', 'Git', 'REST APIs'],
+          projects: [
+            {
+              id: 'proj-short-1',
+              title: 'TaskFlow App',
+              subtitle: 'Open-source Kanban Tool',
+              link: 'github.com/emily/taskflow',
+              description:
+                'Lightweight drag-and-drop task management tool built with TypeScript and Vite.',
+            },
+          ],
+          certifications: [],
+          achievements: [],
+          languages: [
+            { id: 'lang-1', language: 'English', proficiency: 'Native' },
+            { id: 'lang-2', language: 'Spanish', proficiency: 'Conversational' },
+          ],
+          customSections: [],
+        };
+      }
+
       // If user came from ImportPage or CreatePage with state
       const navState = location.state as {
         fullName?: string;
@@ -78,9 +142,102 @@ export const EditorPage: React.FC = () => {
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving'>('saved');
   const [zoomLevel, setZoomLevel] = useState<number>(100);
   const [mobileView, setMobileView] = useState<'edit' | 'preview'>('edit');
+  const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
+  const [pageSize, setPageSize] = useState<'a4' | 'letter'>(() => {
+    const qSize = new URLSearchParams(location.search).get('size');
+    return qSize === 'letter' ? 'letter' : 'a4';
+  });
+  const [isFullscreenPreview, setIsFullscreenPreview] = useState<boolean>(false);
 
   const isFirstRender = React.useRef(true);
   const photoInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  const flushPendingSave = () => {
+    try {
+      const sanitizedData: CVData = {
+        ...cvData,
+        personal: {
+          ...cvData.personal,
+          photo: cvData.personal.photo
+            ? {
+                key: cvData.personal.photo.key,
+                shape: cvData.personal.photo.shape,
+                zoom: cvData.personal.photo.zoom,
+                position: cvData.personal.photo.position,
+                aspectRatio: cvData.personal.photo.aspectRatio,
+              }
+            : undefined,
+        },
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitizedData));
+      setSaveStatus('saved');
+    } catch {
+      // ignore storage errors
+    }
+  };
+
+  const applyPageGeometry = (size: 'a4' | 'letter') => {
+    let styleEl = document.getElementById('cv-print-geometry-style') as HTMLStyleElement | null;
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = 'cv-print-geometry-style';
+      document.head.appendChild(styleEl);
+    }
+    if (size === 'letter') {
+      styleEl.innerHTML = `@page { size: letter portrait; margin: 0.35in 0.45in 0.45in 0.45in; }`;
+      document.body.setAttribute('data-page-size', 'letter');
+    } else {
+      styleEl.innerHTML = `@page { size: A4 portrait; margin: 8mm 10mm 10mm 10mm; }`;
+      document.body.setAttribute('data-page-size', 'a4');
+    }
+  };
+
+  useEffect(() => {
+    applyPageGeometry(pageSize);
+    return () => {
+      const styleEl = document.getElementById('cv-print-geometry-style');
+      if (styleEl) styleEl.remove();
+      document.body.removeAttribute('data-page-size');
+    };
+  }, [pageSize]);
+
+  const handleExecutePrint = async () => {
+    // 1. Immediately flush unsaved edits
+    flushPendingSave();
+
+    // 2. Ensure page geometry matches selected size
+    applyPageGeometry(pageSize);
+
+    // 3. Pre-load/decode profile photo if present
+    if (cvData.personal.photo?.url) {
+      try {
+        const img = new Image();
+        img.src = cvData.personal.photo.url;
+        if (!img.complete && img.decode) {
+          await img.decode().catch(() => {});
+        }
+      } catch {
+        // Continue if decode encounters issues
+      }
+    }
+
+    // 4. Temporarily set document title for clean suggested PDF file name
+    const candidateName = cvData.personal.fullName?.trim() || 'CV';
+    const cleanTemplate = currentTemplate.name.replace(/\s+/g, '_');
+    const originalTitle = document.title;
+    document.title = `${candidateName}_${cleanTemplate}_CVForge`;
+
+    // 5. Close export modal to prevent backdrop interference
+    setIsExportModalOpen(false);
+
+    // 6. Trigger native print after brief frame tick
+    setTimeout(() => {
+      window.print();
+      setTimeout(() => {
+        document.title = originalTitle;
+      }, 1000);
+    }, 60);
+  };
 
   // Hydrate profile photo from IndexedDB on initial mount if key exists but url is missing
   useEffect(() => {
@@ -703,99 +860,216 @@ export const EditorPage: React.FC = () => {
       : 'cv-editor-workspace--mobile-preview';
 
   return (
-    <div className="cv-editor-page">
-      {/* 1. Sub-Header Toolbar */}
-      <div className="cv-editor-toolbar">
-        <div className="cv-editor-toolbar__left">
-          <Link to="/templates" className="cv-editor-back-link">
-            ← Templates
-          </Link>
-          <div className="cv-editor-doc-title">
-            <input
-              type="text"
-              value={cvData.title}
-              onChange={(e) => {
-                setSaveStatus('saving');
-                setCvData((prev) => ({ ...prev, title: e.target.value }));
+    <div
+      className={`cv-editor-page ${
+        isFullscreenPreview ? 'cv-editor-page--fullscreen-preview' : ''
+      }`}
+    >
+      {/* Optional In-App Fullscreen Print Preview Bar */}
+      {isFullscreenPreview && (
+        <div
+          className="cv-preview-fullscreen-bar"
+          role="toolbar"
+          aria-label="Print Preview Bar"
+        >
+          <div className="cv-preview-fullscreen-bar__left">
+            <button
+              type="button"
+              className="cv-preview-exit-btn"
+              onClick={() => setIsFullscreenPreview(false)}
+            >
+              ← Back to Editor
+            </button>
+            <span className="cv-preview-fullscreen-title">
+              Print Preview • {currentTemplate.name}
+            </span>
+          </div>
+
+          <div className="cv-preview-fullscreen-bar__center">
+            <div className="cv-page-size-toggle" role="group" aria-label="Page Size">
+              <button
+                type="button"
+                className={`cv-page-size-btn ${
+                  pageSize === 'a4' ? 'cv-page-size-btn--active' : ''
+                }`}
+                onClick={() => {
+                  setPageSize('a4');
+                  applyPageGeometry('a4');
+                }}
+              >
+                A4 Format
+              </button>
+              <button
+                type="button"
+                className={`cv-page-size-btn ${
+                  pageSize === 'letter' ? 'cv-page-size-btn--active' : ''
+                }`}
+                onClick={() => {
+                  setPageSize('letter');
+                  applyPageGeometry('letter');
+                }}
+              >
+                US Letter
+              </button>
+            </div>
+
+            <div
+              className="cv-zoom-controls"
+              role="group"
+              aria-label="Preview zoom controls"
+            >
+              <button
+                type="button"
+                className="cv-zoom-btn"
+                onClick={handleZoomOut}
+                title="Zoom Out"
+                aria-label="Zoom Out"
+              >
+                −
+              </button>
+              <span className="cv-zoom-level">{zoomLevel}%</span>
+              <button
+                type="button"
+                className="cv-zoom-btn"
+                onClick={handleZoomIn}
+                title="Zoom In"
+                aria-label="Zoom In"
+              >
+                +
+              </button>
+              <button
+                type="button"
+                className="cv-zoom-btn"
+                onClick={handleZoomReset}
+                title="Reset Zoom to 100%"
+                aria-label="Reset Zoom"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+
+          <div className="cv-preview-fullscreen-bar__right">
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              leftIcon={<PrinterIcon size={16} />}
+              onClick={() => {
+                flushPendingSave();
+                setIsExportModalOpen(true);
               }}
-              className="cv-doc-title-input"
-              aria-label="Document Title"
-            />
-          </div>
-          <Badge variant="accent" size="sm">
-            {currentTemplate.name}
-          </Badge>
-          <div className="cv-editor-saved-status">
-            <CheckCircleIcon size={14} />
-            <span>{saveStatus === 'saving' ? 'Saving draft...' : 'Saved locally'}</span>
+            >
+              Print / Save PDF
+            </Button>
           </div>
         </div>
+      )}
 
-        <div className="cv-editor-toolbar__right">
-          {/* Responsive Mobile / Tablet View Switcher */}
-          <div className="cv-mobile-view-toggle">
-            <button
-              type="button"
-              className={`cv-mobile-toggle-btn ${
-                mobileView === 'edit' ? 'cv-mobile-toggle-btn--active' : ''
-              }`}
-              onClick={() => setMobileView('edit')}
-            >
-              Edit Form
-            </button>
-            <button
-              type="button"
-              className={`cv-mobile-toggle-btn ${
-                mobileView === 'preview' ? 'cv-mobile-toggle-btn--active' : ''
-              }`}
-              onClick={() => setMobileView('preview')}
-            >
-              Live Preview
-            </button>
+      {/* 1. Sub-Header Toolbar (Hidden when in Fullscreen Preview) */}
+      {!isFullscreenPreview && (
+        <div className="cv-editor-toolbar">
+          <div className="cv-editor-toolbar__left">
+            <Link to="/templates" className="cv-editor-back-link">
+              ← Templates
+            </Link>
+            <div className="cv-editor-doc-title">
+              <input
+                type="text"
+                value={cvData.title}
+                onChange={(e) => {
+                  setSaveStatus('saving');
+                  setCvData((prev) => ({ ...prev, title: e.target.value }));
+                }}
+                className="cv-doc-title-input"
+                aria-label="Document Title"
+              />
+            </div>
+            <Badge variant="accent" size="sm">
+              {currentTemplate.name}
+            </Badge>
+            <div className="cv-editor-saved-status">
+              <CheckCircleIcon size={14} />
+              <span>{saveStatus === 'saving' ? 'Saving draft...' : 'Saved locally'}</span>
+            </div>
           </div>
 
-          {/* Quick template selector */}
-          <div className="cv-template-quick-select">
-            <label htmlFor="quick-tpl" className="sr-only">
-              Switch Template
-            </label>
-            <select
-              id="quick-tpl"
-              value={currentTemplate.id}
-              onChange={(e) => handleTemplateChange(e.target.value)}
-              className="cv-quick-tpl-select"
-              aria-label="Switch CV Template"
-            >
-              {TEMPLATES_REGISTRY.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <div className="cv-editor-toolbar__right">
+            {/* Responsive Mobile / Tablet View Switcher */}
+            <div className="cv-mobile-view-toggle">
+              <button
+                type="button"
+                className={`cv-mobile-toggle-btn ${
+                  mobileView === 'edit' ? 'cv-mobile-toggle-btn--active' : ''
+                }`}
+                onClick={() => setMobileView('edit')}
+              >
+                Edit Form
+              </button>
+              <button
+                type="button"
+                className={`cv-mobile-toggle-btn ${
+                  mobileView === 'preview' ? 'cv-mobile-toggle-btn--active' : ''
+                }`}
+                onClick={() => setMobileView('preview')}
+              >
+                Live Preview
+              </button>
+            </div>
 
-          <Button
-            to="/templates"
-            variant="ghost"
-            size="sm"
-            leftIcon={<LayersIcon size={16} />}
-          >
-            Templates
-          </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            leftIcon={<DownloadIcon size={16} />}
-            onClick={() =>
-              alert(
-                'PDF Export Engine will be attached in Stage 2. Your document and template layout are active.'
-              )
-            }
-          >
-            Export PDF
-          </Button>
+            {/* Quick template selector */}
+            <div className="cv-template-quick-select">
+              <label htmlFor="quick-tpl" className="sr-only">
+                Switch Template
+              </label>
+              <select
+                id="quick-tpl"
+                value={currentTemplate.id}
+                onChange={(e) => handleTemplateChange(e.target.value)}
+                className="cv-quick-tpl-select"
+                aria-label="Switch CV Template"
+              >
+                {TEMPLATES_REGISTRY.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <Button
+              to="/templates"
+              variant="ghost"
+              size="sm"
+              leftIcon={<LayersIcon size={16} />}
+            >
+              Templates
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              leftIcon={<EyeIcon size={16} />}
+              onClick={() => setIsFullscreenPreview(true)}
+              title="Open Clean Full-Screen Preview"
+            >
+              Preview
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              leftIcon={<PrinterIcon size={16} />}
+              onClick={() => {
+                flushPendingSave();
+                setIsExportModalOpen(true);
+              }}
+            >
+              Export PDF
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* 2. Split-Pane Workspace: Left 42% (Form), Right 58% (Preview) */}
       <div className={`cv-editor-workspace ${workspaceMobileClass}`}>
@@ -1991,6 +2265,23 @@ export const EditorPage: React.FC = () => {
           </div>
         </section>
       </div>
+
+      {/* Production-Quality Print & PDF Export Dialog */}
+      <PrintExportModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        onPrint={handleExecutePrint}
+        onTogglePreview={() => setIsFullscreenPreview(true)}
+        pageSize={pageSize}
+        onPageSizeChange={(newSize) => {
+          setPageSize(newSize);
+          applyPageGeometry(newSize);
+        }}
+        templateName={currentTemplate.name}
+        candidateName={cvData.personal.fullName}
+        hasPhoto={!!cvData.personal.photo?.url}
+      />
     </div>
   );
 };
+

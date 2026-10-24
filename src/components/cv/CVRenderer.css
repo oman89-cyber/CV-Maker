@@ -1,3 +1,5 @@
+@import './CVPrint.css';
+
 /* ==========================================================================
    CVForge Design System: Template Layout Engines & Typography Styles
    ========================================================================== */
@@ -571,11 +573,4 @@
   margin-bottom: 8px;
 }
 
-@media print {
-  .cv-profile-photo-frame {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    break-inside: avoid;
-  }
-}
 
