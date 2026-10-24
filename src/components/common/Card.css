@@ -1,0 +1,43 @@
+.cv-card {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  position: relative;
+  transition: all var(--transition-normal);
+}
+
+.cv-card--default {
+  box-shadow: var(--shadow-sm);
+}
+
+.cv-card--flat {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-light);
+}
+
+.cv-card--interactive {
+  box-shadow: var(--shadow-xs);
+  cursor: pointer;
+}
+
+.cv-card--interactive:hover {
+  border-color: var(--border-medium);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.cv-card--p-none {
+  padding: 0;
+}
+
+.cv-card--p-sm {
+  padding: 16px;
+}
+
+.cv-card--p-md {
+  padding: 24px;
+}
+
+.cv-card--p-lg {
+  padding: 32px;
+}

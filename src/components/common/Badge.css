@@ -1,0 +1,45 @@
+.cv-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  width: fit-content;
+}
+
+.cv-badge--sm {
+  font-size: 0.75rem;
+  padding: 4px 10px;
+}
+
+.cv-badge--md {
+  font-size: 0.8125rem;
+  padding: 6px 14px;
+}
+
+.cv-badge--accent {
+  background-color: var(--accent-light);
+  color: var(--accent);
+  border: 1px solid var(--accent-light-border);
+}
+
+.cv-badge--neutral {
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-light);
+}
+
+.cv-badge--success {
+  background-color: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+.cv-badge__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

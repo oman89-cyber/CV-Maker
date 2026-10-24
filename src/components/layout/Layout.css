@@ -1,0 +1,13 @@
+.cv-app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--bg-primary);
+}
+
+.cv-main-content {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+}

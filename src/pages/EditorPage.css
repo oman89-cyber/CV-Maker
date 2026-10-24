@@ -1,0 +1,453 @@
+.cv-editor-page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  background-color: var(--bg-tertiary);
+  min-height: calc(100vh - 72px);
+}
+
+/* Toolbar */
+.cv-editor-toolbar {
+  height: 60px;
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  gap: 16px;
+  z-index: 50;
+  position: sticky;
+  top: 72px;
+}
+
+.cv-editor-toolbar__left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.cv-editor-back-link {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: color var(--transition-fast);
+}
+
+.cv-editor-back-link:hover {
+  color: var(--accent);
+}
+
+.cv-doc-title-input {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  border: 1px solid transparent;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  background-color: transparent;
+  outline: none;
+  transition: all var(--transition-fast);
+}
+
+.cv-doc-title-input:hover {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-light);
+}
+
+.cv-doc-title-input:focus {
+  background-color: var(--bg-primary);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-ring);
+}
+
+.cv-editor-saved-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+  color: #059669;
+  font-weight: 500;
+}
+
+.cv-editor-toolbar__right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Workspace */
+.cv-editor-workspace {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Left Sidebar */
+.cv-editor-sidebar {
+  width: 440px;
+  background-color: var(--bg-primary);
+  border-right: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow-y: auto;
+}
+
+.cv-sidebar-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-light);
+  background-color: var(--bg-secondary);
+}
+
+.cv-sidebar-tab {
+  flex: 1;
+  padding: 12px 14px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 2px solid transparent;
+  transition: all var(--transition-fast);
+}
+
+.cv-sidebar-tab:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-tertiary);
+}
+
+.cv-sidebar-tab--active {
+  color: var(--accent);
+  background-color: var(--bg-primary);
+  border-bottom-color: var(--accent);
+}
+
+.cv-sidebar-section-list {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cv-sidebar-section-list__title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  padding: 0 8px;
+}
+
+.cv-section-nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+  background-color: transparent;
+  width: 100%;
+}
+
+.cv-section-nav-item:hover {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.cv-section-nav-item--active {
+  background-color: var(--accent-light);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.cv-section-nav-item__left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cv-section-status-check {
+  color: #059669;
+  display: flex;
+  align-items: center;
+}
+
+/* Form Container */
+.cv-section-form-container {
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  flex: 1;
+}
+
+.cv-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cv-form-title {
+  font-size: 1.125rem;
+  color: var(--text-primary);
+}
+
+.cv-form-placeholder-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cv-form-notice {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  padding: 12px;
+  border-radius: var(--radius-md);
+}
+
+.cv-form-sample-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 0;
+}
+
+.cv-form-sample-row {
+  display: flex;
+  gap: 12px;
+}
+
+.cv-form-sample-input {
+  height: 38px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  flex: 1;
+}
+
+.cv-form-sample-textarea {
+  height: 80px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+}
+
+.cv-form-cta-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* Right Side: Preview Canvas */
+.cv-editor-preview-canvas {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-tertiary);
+  overflow: hidden;
+}
+
+.cv-canvas-bar {
+  height: 44px;
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid var(--border-light);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cv-canvas-bar__info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.cv-canvas-bar__info svg {
+  color: var(--accent);
+}
+
+.cv-canvas-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.cv-preview-scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 40px 24px 60px;
+  display: flex;
+  justify-content: center;
+}
+
+/* A4 Sheet */
+.cv-a4-sheet {
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 740px;
+  min-height: 980px;
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.cv-doc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.cv-doc-name {
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.cv-doc-role {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-top: 4px;
+}
+
+.cv-doc-contact {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: right;
+  line-height: 1.5;
+}
+
+.cv-doc-divider {
+  height: 2px;
+  background-color: var(--border-light);
+}
+
+.cv-doc-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cv-doc-section-heading {
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 4px;
+}
+
+.cv-doc-body-text {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.cv-doc-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.cv-doc-item__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.8125rem;
+}
+
+.cv-doc-item__title {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.cv-doc-item__company {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.cv-doc-item__date {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.cv-doc-bullet-list {
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cv-doc-bullet-list li {
+  font-size: 0.78125rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.cv-doc-skills-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cv-doc-skill-pill {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  color: var(--text-secondary);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .cv-editor-workspace {
+    flex-direction: column;
+  }
+
+  .cv-editor-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border-light);
+    max-height: 380px;
+  }
+
+  .cv-a4-sheet {
+    padding: 32px 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .cv-doc-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cv-doc-contact {
+    text-align: left;
+  }
+}
