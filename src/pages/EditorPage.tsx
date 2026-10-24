@@ -985,12 +985,14 @@ export const EditorPage: React.FC = () => {
                 aria-label="Document Title"
               />
             </div>
-            <Badge variant="accent" size="sm">
-              {currentTemplate.name}
-            </Badge>
-            <div className="cv-editor-saved-status">
-              <CheckCircleIcon size={14} />
-              <span>{saveStatus === 'saving' ? 'Saving draft...' : 'Saved locally'}</span>
+            <div className="cv-editor-status-wrap">
+              <Badge variant="accent" size="sm">
+                {currentTemplate.name}
+              </Badge>
+              <div className="cv-editor-saved-status">
+                <CheckCircleIcon size={14} />
+                <span>{saveStatus === 'saving' ? 'Saving draft...' : 'Saved locally'}</span>
+              </div>
             </div>
           </div>
 

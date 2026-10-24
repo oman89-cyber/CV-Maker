@@ -75,13 +75,22 @@
   box-shadow: 0 0 0 2px var(--accent-ring);
 }
 
+.cv-editor-status-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 .cv-editor-saved-status {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 5px;
   font-size: 0.75rem;
   color: #059669;
   font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .cv-editor-toolbar__right {
@@ -848,6 +857,14 @@
    Responsive Layout Rules
    -------------------------------------------------------------------------- */
 @media (max-width: 1023px) {
+  .cv-editor-toolbar {
+    height: auto;
+    min-height: 56px;
+    padding: 8px 16px;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+  }
+
   .cv-mobile-view-toggle {
     display: flex;
   }
@@ -855,6 +872,9 @@
   .cv-editor-workspace {
     display: flex;
     flex-direction: column;
+    height: auto;
+    flex: 1 1 0%;
+    min-height: 0;
   }
 
   .cv-editor-workspace--mobile-edit .cv-editor-sidebar {
@@ -884,11 +904,92 @@
 
 @media (max-width: 640px) {
   .cv-editor-toolbar {
-    padding: 0 12px;
+    padding: 8px 12px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .cv-editor-toolbar__left {
+    display: flex;
+    align-items: center;
+    gap: 6px 10px;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .cv-editor-back-link {
+    font-size: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .cv-editor-doc-title {
+    flex: 1 1 100px;
+    min-width: 80px;
+    max-width: 100%;
   }
 
   .cv-doc-title-input {
-    max-width: 160px;
+    width: 100%;
+    max-width: 100%;
+    font-size: 0.8125rem;
+    padding: 2px 6px;
+  }
+
+  .cv-editor-status-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .cv-editor-status-wrap .cv-badge {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .cv-editor-saved-status {
+    font-size: 0.71875rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .cv-editor-toolbar__right {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 6px 8px;
+  }
+
+  .cv-mobile-view-toggle {
+    flex: 1 1 auto;
+  }
+
+  .cv-mobile-toggle-btn {
+    flex: 1;
+    text-align: center;
+    padding: 5px 8px;
+    font-size: 0.71875rem;
+  }
+
+  .cv-template-quick-select {
+    flex-shrink: 0;
+  }
+
+  .cv-quick-tpl-select {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    max-width: 125px;
+  }
+
+  .cv-canvas-bar {
+    padding: 0 12px;
+    height: auto;
+    min-height: 44px;
+    flex-wrap: wrap;
+    gap: 6px;
   }
 
   .cv-grid-2 {
