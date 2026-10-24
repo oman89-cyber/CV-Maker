@@ -1,21 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowRightIcon, SparklesIcon, EyeIcon } from '../components/common/Icons';
 import { Button } from '../components/common/Button';
 import { Badge } from '../components/common/Badge';
-import { Card } from '../components/common/Card';
-import { TEMPLATES_REGISTRY } from '../data/templates';
+import { CVRenderer } from '../components/cv/CVRenderer';
+import { DEFAULT_CV_DATA } from '../types/cv';
+import { TEMPLATES_REGISTRY, type TemplateConfig } from '../data/templates';
 import './TemplatesPage.css';
 
 export const TemplatesPage: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [previewModalTemplate, setPreviewModalTemplate] = useState<TemplateConfig | null>(null);
+
+  // Close modal on Escape key press
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setPreviewModalTemplate(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const filteredTemplates = TEMPLATES_REGISTRY.filter((tpl) => {
-    const matchesCategory = activeCategory === 'all' || tpl.category === activeCategory;
+    const matchesCategory =
+      activeCategory === 'all' ||
+      tpl.category === activeCategory ||
+      (activeCategory === 'executive' && (tpl.category === 'executive' || tpl.id === 'finance-professional')) ||
+      (activeCategory === 'minimal' && (tpl.category === 'minimal' || tpl.id === 'ats-classic'));
+
+    const query = searchQuery.toLowerCase();
     const matchesSearch =
-      tpl.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tpl.categoryLabel.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tpl.description.toLowerCase().includes(searchQuery.toLowerCase());
+      tpl.name.toLowerCase().includes(query) ||
+      tpl.family.toLowerCase().includes(query) ||
+      tpl.categoryLabel.toLowerCase().includes(query) ||
+      tpl.description.toLowerCase().includes(query) ||
+      (tpl.tag && tpl.tag.toLowerCase().includes(query));
+
     return matchesCategory && matchesSearch;
   });
 
@@ -25,24 +47,25 @@ export const TemplatesPage: React.FC = () => {
       <section className="cv-templates-header">
         <div className="container">
           <Badge variant="accent" icon={<SparklesIcon size={14} />}>
-            Curated Template Library
+            Curated Design System
           </Badge>
-          <h1 className="cv-templates-title">Explore 50+ Professional Templates</h1>
+          <h1 className="cv-templates-title">Explore 10 Distinct Resume Design Families</h1>
           <p className="cv-templates-subtitle">
-            Recruiter-approved designs crafted for maximum readability, clean typographical
-            hierarchy, and 100% ATS parser compatibility.
+            Recruiter-approved, art-directed layouts designed with deliberate typography,
+            balanced grid hierarchies, and 100% ATS parser fidelity.
           </p>
 
           {/* Filter Bar */}
           <div className="cv-filter-bar">
             <div className="cv-filter-tabs" role="tablist" aria-label="Template categories">
               {[
-                { id: 'all', label: 'All Templates' },
+                { id: 'all', label: 'All Families (10)' },
                 { id: 'modern', label: 'Tech & Modern' },
-                { id: 'executive', label: 'Executive' },
-                { id: 'minimal', label: 'Minimalist' },
-                { id: 'academic', label: 'Academic' },
-                { id: 'creative', label: 'Creative' },
+                { id: 'executive', label: 'Executive & Finance' },
+                { id: 'minimal', label: 'Minimalist & ATS' },
+                { id: 'academic', label: 'Academic & Science' },
+                { id: 'creative', label: 'Creative & Portfolio' },
+                { id: 'graduate', label: 'Early Career & Grads' },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -61,7 +84,7 @@ export const TemplatesPage: React.FC = () => {
             <div className="cv-search-box">
               <input
                 type="text"
-                placeholder="Search templates by role or style..."
+                placeholder="Search by role, style, or family..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="cv-search-input"
@@ -93,31 +116,12 @@ export const TemplatesPage: React.FC = () => {
           ) : (
             <div className="cv-templates-grid">
               {filteredTemplates.map((template) => (
-                <Card key={template.id} variant="default" padding="none" className="cv-tpl-card">
+                <div key={template.id} className="cv-tpl-card">
+                  {/* Real Miniature Preview */}
                   <div className="cv-tpl-card__preview">
-                    <div
-                      className="cv-tpl-preview-mockup"
-                      style={{ borderTopColor: template.primaryColor }}
-                    >
-                      <div className="cv-tpl-mockup__header">
-                        <div
-                          className="cv-tpl-mockup__bar"
-                          style={{ backgroundColor: template.primaryColor, width: '45%' }}
-                        />
-                        <div className="cv-tpl-mockup__bar cv-tpl-mockup__bar--sub" />
-                      </div>
-                      <div className="cv-tpl-mockup__divider" />
-                      <div className="cv-tpl-mockup__body">
-                        <div className="cv-tpl-mockup__left">
-                          <div className="cv-tpl-mockup__line" />
-                          <div className="cv-tpl-mockup__line" />
-                          <div className="cv-tpl-mockup__line" />
-                          <div className="cv-tpl-mockup__line" style={{ width: '80%' }} />
-                        </div>
-                        <div className="cv-tpl-mockup__right">
-                          <div className="cv-tpl-mockup__line" />
-                          <div className="cv-tpl-mockup__line" />
-                        </div>
+                    <div className="cv-tpl-real-miniature">
+                      <div className="cv-tpl-real-miniature__scale">
+                        <CVRenderer cvData={DEFAULT_CV_DATA} template={template} />
                       </div>
                     </div>
 
@@ -129,12 +133,30 @@ export const TemplatesPage: React.FC = () => {
                       )}
                       <span className="cv-tpl-badge-pages">{template.pages}</span>
                     </div>
+
+                    {/* Hover Overlay with Quick Preview */}
+                    <div className="cv-tpl-card__overlay">
+                      <button
+                        type="button"
+                        className="cv-tpl-overlay-btn"
+                        onClick={() => setPreviewModalTemplate(template)}
+                        title={`Full Preview of ${template.name}`}
+                      >
+                        <EyeIcon size={15} />
+                        <span>Quick Preview</span>
+                      </button>
+                    </div>
                   </div>
 
+                  {/* Card Content & Actions */}
                   <div className="cv-tpl-card__content">
                     <div>
                       <div className="cv-tpl-card__meta">
-                        <span className="cv-tpl-category">{template.categoryLabel}</span>
+                        <span
+                          className="cv-tpl-family-dot"
+                          style={{ backgroundColor: template.primaryColor }}
+                        />
+                        <span className="cv-tpl-category">{template.family}</span>
                       </div>
                       <h3 className="cv-tpl-card__title">{template.name}</h3>
                       <p className="cv-tpl-card__desc">{template.description}</p>
@@ -151,16 +173,16 @@ export const TemplatesPage: React.FC = () => {
                         Use this template
                       </Button>
                       <Button
-                        to={`/editor/${template.id}?preview=true`}
                         variant="ghost"
                         size="sm"
                         leftIcon={<EyeIcon size={14} />}
+                        onClick={() => setPreviewModalTemplate(template)}
                       >
                         Preview
                       </Button>
                     </div>
                   </div>
-                </Card>
+                </div>
               ))}
             </div>
           )}
@@ -170,8 +192,8 @@ export const TemplatesPage: React.FC = () => {
             <div>
               <h3 className="cv-import-banner__title">Have an existing resume ready?</h3>
               <p className="cv-import-banner__desc">
-                Import your PDF, DOCX, or JSON resume and apply any of these 50+ templates with one
-                click.
+                Import your existing document and apply any of these 10 art-directed design families
+                with real-time typography and layout adaptation.
               </p>
             </div>
             <Button
@@ -185,6 +207,62 @@ export const TemplatesPage: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Full-Size Interactive Template Preview Modal Dialog */}
+      {previewModalTemplate && (
+        <div
+          className="cv-modal-backdrop"
+          onClick={() => setPreviewModalTemplate(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Preview of ${previewModalTemplate.name}`}
+        >
+          <div className="cv-modal-window" onClick={(e) => e.stopPropagation()}>
+            <div className="cv-modal-header">
+              <div>
+                <h2 className="cv-modal-title">{previewModalTemplate.name}</h2>
+                <span className="cv-modal-subtitle">
+                  Family: <strong>{previewModalTemplate.family}</strong> • Layout:{' '}
+                  {previewModalTemplate.layoutEngine} • Typography:{' '}
+                  {previewModalTemplate.fontFamily}
+                </span>
+              </div>
+              <button
+                type="button"
+                className="cv-modal-close-btn"
+                onClick={() => setPreviewModalTemplate(null)}
+                aria-label="Close Preview"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="cv-modal-body">
+              <div className="cv-modal-cv-container">
+                <CVRenderer cvData={DEFAULT_CV_DATA} template={previewModalTemplate} />
+              </div>
+            </div>
+
+            <div className="cv-modal-footer">
+              <Button
+                variant="ghost"
+                size="md"
+                onClick={() => setPreviewModalTemplate(null)}
+              >
+                Close Preview
+              </Button>
+              <Button
+                to={`/editor/${previewModalTemplate.id}`}
+                variant="primary"
+                size="md"
+                rightIcon={<ArrowRightIcon size={16} />}
+              >
+                Use this template
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

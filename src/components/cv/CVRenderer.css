@@ -1,12 +1,15 @@
+/* ==========================================================================
+   CVForge Design System: Template Layout Engines & Typography Styles
+   ========================================================================== */
+
 .cv-renderer {
   width: 100%;
   max-width: 800px;
   min-height: 1080px;
   background-color: #ffffff;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-  border-radius: 4px;
+  border-radius: 2px;
   box-sizing: border-box;
-  font-family: inherit;
   color: #1e293b;
   line-height: 1.5;
   position: relative;
@@ -15,28 +18,85 @@
   flex-direction: column;
 }
 
+/* --------------------------------------------------------------------------
+   Typography Tokens
+   -------------------------------------------------------------------------- */
 .cv-renderer--font-serif {
   font-family: "Georgia", "Cambria", "Times New Roman", serif;
 }
 
 .cv-renderer--font-system {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 .cv-renderer--font-inter {
-  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* Header styles */
+/* --------------------------------------------------------------------------
+   Spacing Scale Tokens
+   -------------------------------------------------------------------------- */
+.cv-renderer--spacing-compact {
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.cv-renderer--spacing-compact .cv-renderer__header {
+  padding: 24px 32px 18px;
+}
+
+.cv-renderer--spacing-compact .cv-renderer__body {
+  padding: 20px 32px 32px;
+  gap: 16px;
+}
+
+.cv-renderer--spacing-compact .cv-renderer__section {
+  gap: 8px;
+}
+
+.cv-renderer--spacing-compact .cv-renderer__section-heading {
+  margin-bottom: 4px;
+}
+
+.cv-renderer--spacing-standard {
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+.cv-renderer--spacing-standard .cv-renderer__header {
+  padding: 32px 36px 22px;
+}
+
+.cv-renderer--spacing-standard .cv-renderer__body {
+  padding: 28px 36px 40px;
+  gap: 22px;
+}
+
+.cv-renderer--spacing-relaxed {
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.cv-renderer--spacing-relaxed .cv-renderer__header {
+  padding: 40px 44px 28px;
+}
+
+.cv-renderer--spacing-relaxed .cv-renderer__body {
+  padding: 36px 44px 50px;
+  gap: 28px;
+}
+
+/* --------------------------------------------------------------------------
+   Header Styles
+   -------------------------------------------------------------------------- */
 .cv-renderer__header {
-  padding: 36px 40px 24px;
   border-bottom: 2px solid #e2e8f0;
+  box-sizing: border-box;
 }
 
 .cv-renderer__header--accent-banner {
   background: linear-gradient(135deg, var(--tpl-primary, #1e3a8a) 0%, var(--tpl-secondary, #2563eb) 100%);
   color: #ffffff;
-  padding: 36px 40px;
   border-bottom: none;
 }
 
@@ -74,26 +134,31 @@
   border-bottom: 3px solid var(--tpl-primary, #0f172a);
 }
 
+.cv-renderer__header--minimal {
+  border-bottom: 1px solid #18181b;
+  padding-bottom: 12px;
+}
+
 .cv-renderer__name {
   font-size: 26px;
   font-weight: 700;
-  margin: 0 0 6px 0;
+  margin: 0 0 4px 0;
   color: #0f172a;
   letter-spacing: -0.02em;
 }
 
 .cv-renderer__role {
-  font-size: 15px;
+  font-size: 14.5px;
   font-weight: 600;
   color: var(--tpl-primary, #2563eb);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .cv-renderer__contact {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 16px;
-  font-size: 13px;
+  gap: 6px 14px;
+  font-size: 12.5px;
   color: #64748b;
 }
 
@@ -102,44 +167,38 @@
   align-items: center;
 }
 
-/* Body content */
-.cv-renderer__body {
-  padding: 32px 40px 40px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
+/* --------------------------------------------------------------------------
+   Section & Item Headings
+   -------------------------------------------------------------------------- */
 .cv-renderer__section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .cv-renderer__section-heading {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--tpl-primary, #2563eb);
-  padding-bottom: 6px;
+  padding-bottom: 4px;
   border-bottom: 1.5px solid #e2e8f0;
   margin: 0;
 }
 
 .cv-renderer__text {
-  font-size: 13.5px;
+  font-size: inherit;
   color: #334155;
-  line-height: 1.6;
+  line-height: inherit;
   margin: 0;
 }
 
-/* Items */
 .cv-renderer__item {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-bottom: 6px;
+  gap: 4px;
+  margin-bottom: 4px;
 }
 
 .cv-renderer__item-header {
@@ -147,64 +206,69 @@
   justify-content: space-between;
   align-items: baseline;
   flex-wrap: wrap;
+  gap: 8px;
 }
 
 .cv-renderer__item-title {
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13.5px;
   color: #0f172a;
 }
 
 .cv-renderer__item-sub {
   color: #64748b;
-  font-size: 13.5px;
+  font-size: 13px;
 }
 
 .cv-renderer__item-date {
-  font-size: 12.5px;
+  font-size: 12px;
   color: #64748b;
   font-weight: 500;
 }
 
 .cv-renderer__bullets {
-  margin: 4px 0 0 18px;
+  margin: 4px 0 0 16px;
   padding: 0;
   list-style-type: disc;
 }
 
 .cv-renderer__bullet {
-  font-size: 13px;
+  font-size: 12.5px;
   color: #334155;
   line-height: 1.5;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 
-/* Skills */
+/* --------------------------------------------------------------------------
+   Skills Badges
+   -------------------------------------------------------------------------- */
 .cv-renderer__skills {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .cv-renderer__skill-badge {
   background-color: #f1f5f9;
   color: #334155;
-  padding: 4px 10px;
+  padding: 3px 8px;
   border-radius: 4px;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 500;
   border: 1px solid #e2e8f0;
 }
 
-/* Rich-Text Rendered Content Styles */
+/* --------------------------------------------------------------------------
+   Rich-Text Rendered Content Styles
+   -------------------------------------------------------------------------- */
 .cv-rich-content {
-  font-size: 13.5px;
+  font-size: inherit;
   color: #334155;
-  line-height: 1.6;
+  line-height: inherit;
 }
 
 .cv-rich-content p {
-  margin: 0 0 6px 0;
+  margin: 0 0 5px 0;
 }
 
 .cv-rich-content p:last-child {
@@ -226,28 +290,28 @@
 
 .cv-rich-content ul,
 .cv-rich-content ol {
-  margin: 4px 0 6px 18px;
+  margin: 4px 0 6px 16px;
   padding: 0;
 }
 
 .cv-rich-content li {
   margin-bottom: 3px;
-  font-size: 13px;
+  font-size: 12.5px;
   line-height: 1.5;
 }
 
 /* Languages row */
 .cv-renderer__languages-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 8px 16px;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 6px 12px;
 }
 
 .cv-renderer__language-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 13px;
+  font-size: 12px;
   padding: 4px 8px;
   background-color: #f8fafc;
   border-radius: 4px;
@@ -261,6 +325,257 @@
 
 .cv-renderer__lang-level {
   color: #64748b;
+  font-size: 11.5px;
+}
+
+/* ==========================================================================
+   LAYOUT ENGINE VARIATIONS
+   ========================================================================== */
+
+/* 1. Single Column Layout (Editorial / Swiss / ATS) */
+.cv-renderer--layout-single-column .cv-renderer__body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 2. Two-Column Professional Layout (Silicon Elite / Executive) */
+.cv-renderer--layout-two-column .cv-renderer__body {
+  display: grid;
+  grid-template-columns: 62% 38%;
+  gap: 28px;
+}
+
+.cv-renderer--layout-two-column .cv-col-main,
+.cv-renderer--layout-two-column .cv-col-side {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 3. Left-Sidebar Layout (Data Science Specialist) */
+.cv-renderer--layout-left-sidebar {
+  display: flex;
+  flex-direction: column;
+}
+
+.cv-renderer--layout-left-sidebar .cv-renderer__body-split {
+  display: grid;
+  grid-template-columns: 32% 68%;
+  flex: 1;
+}
+
+.cv-renderer--layout-left-sidebar .cv-sidebar-col {
+  background-color: #f8fafc;
+  border-right: 1px solid #e2e8f0;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.cv-renderer--layout-left-sidebar .cv-main-col {
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* 4. Right-Sidebar Layout (Product Leader) */
+.cv-renderer--layout-right-sidebar {
+  display: flex;
+  flex-direction: column;
+}
+
+.cv-renderer--layout-right-sidebar .cv-renderer__body-split {
+  display: grid;
+  grid-template-columns: 68% 32%;
+  flex: 1;
+}
+
+.cv-renderer--layout-right-sidebar .cv-main-col {
+  padding: 28px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.cv-renderer--layout-right-sidebar .cv-sidebar-col {
+  background-color: #f8fafc;
+  border-left: 1px solid #e2e8f0;
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* 5. Compact Grid Layout (Finance Professional) */
+.cv-renderer--layout-compact-grid .cv-renderer__header {
+  text-align: center;
+  border-bottom: 2px solid #0f172a;
+  padding: 20px 32px 14px;
+}
+
+.cv-renderer--layout-compact-grid .cv-renderer__name {
+  font-size: 22px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #0f172a;
+}
+
+.cv-renderer--layout-compact-grid .cv-renderer__role {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #475569;
+  margin-bottom: 6px;
+}
+
+.cv-renderer--layout-compact-grid .cv-renderer__contact {
+  justify-content: center;
   font-size: 12px;
+  color: #475569;
+}
+
+.cv-renderer--layout-compact-grid .cv-renderer__section-heading {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid #0f172a;
+  color: #0f172a;
+  padding-bottom: 2px;
+}
+
+.cv-renderer--layout-compact-grid .cv-renderer__body {
+  padding: 20px 32px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* 6. Academic Centered Layout (Academic Research) */
+.cv-renderer--layout-academic-centered .cv-renderer__header {
+  text-align: center;
+  border-bottom: 1.5px solid var(--tpl-primary, #0f766e);
+  padding: 32px 40px 20px;
+}
+
+.cv-renderer--layout-academic-centered .cv-renderer__name {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.cv-renderer--layout-academic-centered .cv-renderer__section-heading {
+  font-size: 13px;
+  border-bottom: 1px solid var(--tpl-primary, #0f766e);
+  color: var(--tpl-primary, #0f766e);
+  margin-bottom: 6px;
+}
+
+/* 7. Asymmetric Layout (Creative Atelier) */
+.cv-renderer--layout-asymmetric {
+  border-left: 6px solid var(--tpl-primary, #7c3aed);
+}
+
+.cv-renderer--layout-asymmetric .cv-renderer__header {
+  border-bottom: 2px solid #ede9fe;
+  padding: 32px 36px 20px;
+}
+
+.cv-renderer--layout-asymmetric .cv-renderer__name {
+  font-size: 28px;
+  color: var(--tpl-primary, #7c3aed);
+  font-weight: 800;
+}
+
+.cv-renderer--layout-asymmetric .cv-renderer__section-heading {
+  color: var(--tpl-primary, #7c3aed);
+  border-bottom: 1.5px solid #ede9fe;
+  font-weight: 800;
+}
+
+/* --------------------------------------------------------------------------
+   Profile Photo Component Styles
+   -------------------------------------------------------------------------- */
+.cv-profile-photo-frame {
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background-color: #f8fafc;
+  border: 2px solid var(--tpl-primary, #2563eb);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
+  position: relative;
+}
+
+.cv-photo--circle {
+  border-radius: 50%;
+}
+
+.cv-photo--rounded {
+  border-radius: 8px;
+}
+
+.cv-photo--square {
+  border-radius: 0;
+}
+
+.cv-photo--size-sm {
+  width: 68px;
+  height: 68px;
+}
+.cv-photo--size-sm.cv-photo--ratio-4-5 {
+  width: 68px;
+  height: 85px;
+}
+
+.cv-photo--size-md {
+  width: 90px;
+  height: 90px;
+}
+.cv-photo--size-md.cv-photo--ratio-4-5 {
+  width: 90px;
+  height: 112px;
+}
+
+.cv-photo--size-lg {
+  width: 116px;
+  height: 116px;
+}
+.cv-photo--size-lg.cv-photo--ratio-4-5 {
+  width: 116px;
+  height: 145px;
+}
+
+.cv-profile-photo-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  user-select: none;
+  pointer-events: none;
+  transition: transform 0.1s ease-out;
+}
+
+/* Header Photo Placement Wrappers */
+.cv-header-photo-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.cv-sidebar-photo-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+@media print {
+  .cv-profile-photo-frame {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    break-inside: avoid;
+  }
 }
 

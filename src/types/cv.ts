@@ -1,3 +1,12 @@
+export interface ProfilePhotoSettings {
+  key?: string;
+  url?: string;
+  shape?: 'circle' | 'square' | 'rounded';
+  zoom?: number;
+  position?: { x: number; y: number };
+  aspectRatio?: '1:1' | '4:5';
+}
+
 export interface PersonalInfo {
   fullName: string;
   targetRole: string;
@@ -6,6 +15,7 @@ export interface PersonalInfo {
   location: string;
   linkedin?: string;
   website?: string;
+  photo?: ProfilePhotoSettings;
 }
 
 export interface ExperienceItem {
@@ -243,6 +253,16 @@ export function normalizeCVData(raw: unknown): CVData {
       location: d.personal?.location ?? DEFAULT_CV_DATA.personal.location,
       linkedin: d.personal?.linkedin ?? DEFAULT_CV_DATA.personal.linkedin,
       website: d.personal?.website ?? DEFAULT_CV_DATA.personal.website,
+      photo: d.personal?.photo
+        ? {
+            key: typeof d.personal.photo.key === 'string' ? d.personal.photo.key : undefined,
+            url: typeof d.personal.photo.url === 'string' ? d.personal.photo.url : undefined,
+            shape: d.personal.photo.shape || 'rounded',
+            zoom: typeof d.personal.photo.zoom === 'number' ? d.personal.photo.zoom : 1,
+            position: d.personal.photo.position || { x: 0, y: 0 },
+            aspectRatio: d.personal.photo.aspectRatio || '1:1',
+          }
+        : undefined,
     },
     summary:
       typeof d.summary === 'string' && d.summary.trim()

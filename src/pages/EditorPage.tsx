@@ -6,6 +6,7 @@ import {
   SparklesIcon,
   CheckCircleIcon,
   LayersIcon,
+  UploadIcon,
 } from '../components/common/Icons';
 import { Button } from '../components/common/Button';
 import { Badge } from '../components/common/Badge';
@@ -16,6 +17,7 @@ import {
   DEFAULT_CV_DATA,
   normalizeCVData,
   generateStableId,
+  type ProfilePhotoSettings,
   type ExperienceItem,
   type EducationItem,
   type ProjectItem,
@@ -25,6 +27,7 @@ import {
   type CustomSection,
 } from '../types/cv';
 import { TEMPLATES_REGISTRY, getTemplateById } from '../data/templates';
+import { savePhotoBlob, getPhotoBlob, deletePhotoBlob } from '../utils/photoStorage';
 import './EditorPage.css';
 
 const STORAGE_KEY = 'cvforge_active_document';
@@ -69,8 +72,38 @@ export const EditorPage: React.FC = () => {
   const [mobileView, setMobileView] = useState<'edit' | 'preview'>('edit');
 
   const isFirstRender = React.useRef(true);
+  const photoInputRef = React.useRef<HTMLInputElement | null>(null);
 
-  // Debounced persistence to localStorage (400ms delay)
+  // Hydrate profile photo from IndexedDB on initial mount if key exists but url is missing
+  useEffect(() => {
+    const photoKey = cvData.personal.photo?.key;
+    if (photoKey && !cvData.personal.photo?.url) {
+      let isMounted = true;
+      getPhotoBlob(photoKey).then((blob) => {
+        if (isMounted && blob) {
+          const objectUrl = URL.createObjectURL(blob);
+          setCvData((prev) => {
+            if (!prev.personal.photo || prev.personal.photo.url) return prev;
+            return {
+              ...prev,
+              personal: {
+                ...prev.personal,
+                photo: {
+                  ...prev.personal.photo,
+                  url: objectUrl,
+                },
+              },
+            };
+          });
+        }
+      });
+      return () => {
+        isMounted = false;
+      };
+    }
+  }, [cvData.personal.photo?.key, cvData.personal.photo?.url]);
+
+  // Debounced persistence to localStorage (400ms delay) - strips ephemeral object URLs
   useEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
@@ -79,7 +112,22 @@ export const EditorPage: React.FC = () => {
 
     const timer = setTimeout(() => {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(cvData));
+        const sanitizedData: CVData = {
+          ...cvData,
+          personal: {
+            ...cvData.personal,
+            photo: cvData.personal.photo
+              ? {
+                  key: cvData.personal.photo.key,
+                  shape: cvData.personal.photo.shape,
+                  zoom: cvData.personal.photo.zoom,
+                  position: cvData.personal.photo.position,
+                  aspectRatio: cvData.personal.photo.aspectRatio,
+                }
+              : undefined,
+          },
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitizedData));
       } catch {
         // ignore storage errors
       }
@@ -115,6 +163,169 @@ export const EditorPage: React.FC = () => {
       },
       updatedAt: new Date().toISOString(),
     }));
+  };
+
+  // Profile Photo Upload & Control Handlers
+  const handlePhotoFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Reset input value so identical file can be re-selected if user removed then re-added
+    e.target.value = '';
+
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      alert('Please upload a valid image file (JPG, PNG, or WebP).');
+      return;
+    }
+
+    const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+    if (file.size > MAX_SIZE) {
+      alert('Image file is too large. Please select an image under 5MB.');
+      return;
+    }
+
+    const tempUrl = URL.createObjectURL(file);
+    const testImg = new Image();
+    testImg.src = tempUrl;
+
+    testImg.onload = async () => {
+      try {
+        setSaveStatus('saving');
+        const photoKey = `photo_${Date.now()}`;
+        await savePhotoBlob(photoKey, file);
+
+        if (cvData.personal.photo?.key) {
+          deletePhotoBlob(cvData.personal.photo.key);
+        }
+
+        const defaultShape = currentTemplate.photoConfig?.defaultShape || 'rounded';
+        const defaultRatio = currentTemplate.photoConfig?.aspectRatio || '1:1';
+
+        setCvData((prev) => ({
+          ...prev,
+          personal: {
+            ...prev.personal,
+            photo: {
+              key: photoKey,
+              url: tempUrl,
+              shape: prev.personal.photo?.shape || defaultShape,
+              zoom: prev.personal.photo?.zoom || 1,
+              position: prev.personal.photo?.position || { x: 0, y: 0 },
+              aspectRatio: prev.personal.photo?.aspectRatio || defaultRatio,
+            },
+          },
+          updatedAt: new Date().toISOString(),
+        }));
+      } catch (err) {
+        console.error('Failed to save photo locally:', err);
+        alert('Failed to save photo locally. Please try again.');
+        URL.revokeObjectURL(tempUrl);
+      }
+    };
+
+    testImg.onerror = () => {
+      URL.revokeObjectURL(tempUrl);
+      alert('The selected file could not be decoded as an image. Please choose another file.');
+    };
+  };
+
+  const handleUseSamplePhoto = async () => {
+    try {
+      setSaveStatus('saving');
+      const canvas = document.createElement('canvas');
+      canvas.width = 300;
+      canvas.height = 300;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      // Draw modern gradient backdrop
+      const grad = ctx.createLinearGradient(0, 0, 300, 300);
+      grad.addColorStop(0, '#2563eb');
+      grad.addColorStop(1, '#0f172a');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 300, 300);
+
+      // Draw head
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.arc(150, 115, 60, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Draw shoulders / bust
+      ctx.beginPath();
+      ctx.arc(150, 290, 115, Math.PI, 0, false);
+      ctx.fill();
+
+      canvas.toBlob(async (blob) => {
+        if (!blob) return;
+        const photoKey = `photo_${Date.now()}`;
+        await savePhotoBlob(photoKey, blob);
+        const objectUrl = URL.createObjectURL(blob);
+
+        if (cvData.personal.photo?.key) {
+          deletePhotoBlob(cvData.personal.photo.key);
+        }
+
+        const defaultShape = currentTemplate.photoConfig?.defaultShape || 'rounded';
+        const defaultRatio = currentTemplate.photoConfig?.aspectRatio || '1:1';
+
+        setCvData((prev) => ({
+          ...prev,
+          personal: {
+            ...prev.personal,
+            photo: {
+              key: photoKey,
+              url: objectUrl,
+              shape: prev.personal.photo?.shape || defaultShape,
+              zoom: prev.personal.photo?.zoom || 1,
+              position: prev.personal.photo?.position || { x: 0, y: 0 },
+              aspectRatio: prev.personal.photo?.aspectRatio || defaultRatio,
+            },
+          },
+          updatedAt: new Date().toISOString(),
+        }));
+      }, 'image/png');
+    } catch (err) {
+      console.error('Failed to generate sample photo:', err);
+    }
+  };
+
+  const handleRemovePhoto = async () => {
+    if (cvData.personal.photo?.key) {
+      await deletePhotoBlob(cvData.personal.photo.key);
+    }
+    if (cvData.personal.photo?.url) {
+      URL.revokeObjectURL(cvData.personal.photo.url);
+    }
+
+    setSaveStatus('saving');
+    setCvData((prev) => ({
+      ...prev,
+      personal: {
+        ...prev.personal,
+        photo: undefined,
+      },
+      updatedAt: new Date().toISOString(),
+    }));
+  };
+
+  const updatePhotoSettings = (updates: Partial<ProfilePhotoSettings>) => {
+    setSaveStatus('saving');
+    setCvData((prev) => {
+      if (!prev.personal.photo) return prev;
+      return {
+        ...prev,
+        personal: {
+          ...prev.personal,
+          photo: {
+            ...prev.personal.photo,
+            ...updates,
+          },
+        },
+        updatedAt: new Date().toISOString(),
+      };
+    });
   };
 
   // Reorder utility
@@ -658,6 +869,233 @@ export const EditorPage: React.FC = () => {
                 {/* 1. PERSONAL INFORMATION */}
                 {selectedSection === 'personal' && (
                   <div className="cv-edit-fields">
+                    {/* Profile Photo Manager */}
+                    <div className="cv-photo-manager">
+                      <div className="cv-photo-manager__header">
+                        <span className="cv-photo-manager__title">Profile Photo (Optional)</span>
+                        {currentTemplate.photoConfig?.supported ? (
+                          <span className="cv-photo-template-badge cv-photo-template-badge--supported">
+                            ✓ Displayed in {currentTemplate.name}
+                          </span>
+                        ) : (
+                          <span
+                            className="cv-photo-template-badge cv-photo-template-badge--unsupported"
+                            title="This template design is photo-free. Your photo is safely preserved if you switch to a photo-supported template."
+                          >
+                            Hidden in {currentTemplate.name}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Hidden File Input */}
+                      <input
+                        ref={photoInputRef}
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        style={{ display: 'none' }}
+                        onChange={handlePhotoFileChange}
+                        aria-label="Upload profile photo"
+                      />
+
+                      {!cvData.personal.photo?.url ? (
+                        <div className="cv-photo-dropzone-wrapper">
+                          <div
+                            className="cv-photo-dropzone"
+                            onClick={() => photoInputRef.current?.click()}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                photoInputRef.current?.click();
+                              }
+                            }}
+                            role="button"
+                            tabIndex={0}
+                            aria-label="Click to upload profile photo"
+                          >
+                            <UploadIcon size={24} className="cv-photo-dropzone__icon" />
+                            <div className="cv-photo-dropzone__heading">Upload Profile Photo</div>
+                            <div className="cv-photo-dropzone__hint">
+                              JPG, PNG, WebP up to 5MB. Stored 100% locally in your browser.
+                            </div>
+                          </div>
+                          <div className="cv-photo-sample-cta">
+                            <span>Want a quick test?</span>
+                            <button
+                              type="button"
+                              className="cv-photo-sample-btn"
+                              onClick={handleUseSamplePhoto}
+                            >
+                              Use Sample Photo
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="cv-photo-edit-layout">
+                          <div className="cv-photo-preview-row">
+                            <div
+                              className={`cv-photo-thumbnail-box shape-${
+                                cvData.personal.photo.shape || 'rounded'
+                              } ${
+                                cvData.personal.photo.aspectRatio === '4:5' ? 'ratio-4-5' : ''
+                              }`}
+                            >
+                              <img
+                                src={cvData.personal.photo.url}
+                                alt="Profile Thumbnail"
+                                className="cv-photo-thumbnail-img"
+                                style={{
+                                  objectFit: 'cover',
+                                  transform: `scale(${cvData.personal.photo.zoom || 1})`,
+                                  objectPosition: `${50 + (cvData.personal.photo.position?.x || 0)}% ${
+                                    50 + (cvData.personal.photo.position?.y || 0)
+                                  }%`,
+                                }}
+                              />
+                            </div>
+
+                            <div className="cv-photo-meta">
+                              <span className="cv-label" style={{ marginBottom: 4 }}>
+                                Shape & Framing
+                              </span>
+                              <div className="cv-photo-shape-toggles">
+                                <button
+                                  type="button"
+                                  className={`cv-photo-shape-btn ${
+                                    cvData.personal.photo.shape === 'circle'
+                                      ? 'cv-photo-shape-btn--active'
+                                      : ''
+                                  }`}
+                                  onClick={() => updatePhotoSettings({ shape: 'circle' })}
+                                >
+                                  Circle
+                                </button>
+                                <button
+                                  type="button"
+                                  className={`cv-photo-shape-btn ${
+                                    cvData.personal.photo.shape === 'rounded' ||
+                                    !cvData.personal.photo.shape
+                                      ? 'cv-photo-shape-btn--active'
+                                      : ''
+                                  }`}
+                                  onClick={() => updatePhotoSettings({ shape: 'rounded' })}
+                                >
+                                  Rounded
+                                </button>
+                                <button
+                                  type="button"
+                                  className={`cv-photo-shape-btn ${
+                                    cvData.personal.photo.shape === 'square'
+                                      ? 'cv-photo-shape-btn--active'
+                                      : ''
+                                  }`}
+                                  onClick={() => updatePhotoSettings({ shape: 'square' })}
+                                >
+                                  Square
+                                </button>
+                              </div>
+
+                              <div className="cv-photo-actions-row" style={{ marginTop: 8 }}>
+                                <button
+                                  type="button"
+                                  className="cv-photo-replace-btn"
+                                  onClick={() => photoInputRef.current?.click()}
+                                >
+                                  Change Photo
+                                </button>
+                                <button
+                                  type="button"
+                                  className="cv-photo-remove-btn"
+                                  onClick={handleRemovePhoto}
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Adjustment Sliders */}
+                          <div className="cv-photo-controls-grid">
+                            <div className="cv-photo-slider-group">
+                              <div className="cv-photo-slider-label">
+                                <span>Zoom</span>
+                                <span className="cv-photo-slider-val">
+                                  {Math.round((cvData.personal.photo.zoom || 1) * 100)}%
+                                </span>
+                              </div>
+                              <input
+                                type="range"
+                                min="1"
+                                max="2.5"
+                                step="0.05"
+                                value={cvData.personal.photo.zoom || 1}
+                                onChange={(e) =>
+                                  updatePhotoSettings({ zoom: parseFloat(e.target.value) })
+                                }
+                                className="cv-photo-slider"
+                                aria-label="Photo Zoom Slider"
+                              />
+                            </div>
+
+                            <div className="cv-photo-slider-group">
+                              <div className="cv-photo-slider-label">
+                                <span>Horizontal Pan</span>
+                                <span className="cv-photo-slider-val">
+                                  {cvData.personal.photo.position?.x || 0}%
+                                </span>
+                              </div>
+                              <input
+                                type="range"
+                                min="-50"
+                                max="50"
+                                step="1"
+                                value={cvData.personal.photo.position?.x || 0}
+                                onChange={(e) =>
+                                  updatePhotoSettings({
+                                    position: {
+                                      x: parseInt(e.target.value, 10),
+                                      y: cvData.personal.photo?.position?.y || 0,
+                                    },
+                                  })
+                                }
+                                className="cv-photo-slider"
+                                aria-label="Photo Horizontal Pan Slider"
+                              />
+                            </div>
+
+                            <div className="cv-photo-slider-group">
+                              <div className="cv-photo-slider-label">
+                                <span>Vertical Pan</span>
+                                <span className="cv-photo-slider-val">
+                                  {cvData.personal.photo.position?.y || 0}%
+                                </span>
+                              </div>
+                              <input
+                                type="range"
+                                min="-50"
+                                max="50"
+                                step="1"
+                                value={cvData.personal.photo.position?.y || 0}
+                                onChange={(e) =>
+                                  updatePhotoSettings({
+                                    position: {
+                                      x: cvData.personal.photo?.position?.x || 0,
+                                      y: parseInt(e.target.value, 10),
+                                    },
+                                  })
+                                }
+                                className="cv-photo-slider"
+                                aria-label="Photo Vertical Pan Slider"
+                              />
+                            </div>
+                          </div>
+
+                          <p className="cv-photo-privacy-note">
+                            🔒 <strong>Privacy:</strong> Your photo is kept 100% in local browser storage (IndexedDB). It is never sent to any server or third party.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
                     <div className="cv-form-group">
                       <label className="cv-label" htmlFor="edit-name">
                         Full Name
